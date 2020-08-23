@@ -1,0 +1,88 @@
+GET /_cluster/health
+
+=> _cluster  =  API  [APIs begin with an underscore by convention]
+=> health    =  command
+
+
+
+GET /_cat/nodes?v
+
+=> v  =  this query parameter describes Elasticsearh to include a descriptive header within the output, so we can identify each piece of information
+
+ip             heap.percent  ram.percent  cpu  load_1m  load_5m  load_15m  node.role  master  name
+192.xxx.xx.xx            24           78   20                              dilmrt     *       node-1
+
+
+
+
+GET /_cat/indices?v
+
+health status index                          uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   .kibana_task_manager_1         SlO_lX-NRfuy3ns6n_3ttg   1   0          6           71    193.4kb        193.4kb
+green  open   .kibana-event-log-7.9.0-000001 KSqAVpLuQU-B5T6V3sJr8g   1   0          2            0     10.9kb         10.9kb
+green  open   .kibana_1                      Q5rYpWdiTxqzRfZmyFzvLg   1   0         29            2     10.9mb         10.9mb
+
+=>  pri  =  primary shards => this column represents the number of shards that a given index has
+
+=>  Kibana persis data into Elasticsearch indices
+    - if you set up a dashboard or configure machine learning jobs, these configurations needs to be persisted somewhere
+    - if you setup a fresh instance of Kibana and point it to an existing Elaaticsearch cluster all of the existing Kibana data will be loaded
+=>  the leading "." is to hide indices within the Kibana interface
+
+
+
+curl -XGET "http://localhost:9200/_cluster/health"
+
+=>  HTTP verb "-XGET" could be left out since it is the default HTTP verb used if none is specified
+
+
+
+GET /.kibana/_search
+{
+  "query" : {
+    "match_all" : {}
+  }
+}
+
+curl -XGET "http://localhost:9200/.kibana/_search" -H 'Content-Type: application/json' -d'{  "query" : {    "match_all" : {}  }}'
+
+=>  when including a request body, a "Content-Type" header must be specified
+
+=>  YAML and other formats are supported both within requests and query results
+
+
+** elastic cloud:- to authenticate send credentials along with the request
+curl -XGET -u username:password "http://localhost:9200/.kibana/_search" -H 'Content-Type: application/json' -d'{  "query" : {    "match_all" : {}  }}'
+
+=>  enter the usernam and password for elastic cloud separated by colon
+
+
+=>  Indices are created with single Shard by default [and, this can be changed if need be]
+=>  Increase the number of Shards using the Split API [It involves creating a new index but the process is much easier]
+=>  Reduce the number of Shards using the Shrink API
+
+
+
+// create index
+PUT /pages
+
+=>  a REPLICA Shard is never allocated to the same node as its PRIMARY Shard
+
+
+
+// list all of the SHARDS
+GET /_cat/shards?v
+
+
+=>  KIBANA indices are configured with a Setting named "auto_expand_replicas" with a value of "0-1"
+    - it dynamically change the number of replicas depending on how many nodes our cluster contains
+
+
+
+elasticsearch-2\bin\elasticsearch.bat -Enode.name=node-3 -Epath.data=elasticsearch-2\node-3\data -Epath.logs=elasticsearch-2\node-3\logs
+
+
+
+
+
+
