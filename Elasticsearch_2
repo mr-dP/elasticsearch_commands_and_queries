@@ -83,6 +83,77 @@ elasticsearch-2\bin\elasticsearch.bat -Enode.name=node-3 -Epath.data=elasticsear
 
 
 
+DELETE /pages
+
+
+
+PUT /products
+{
+  "settings" : {
+    "number_of_shards" : 2,
+    "number_of_replicas": 2
+  }
+}
+
+
+
+index a document
+----------------
+->  we can index a document by sending a POST request to an endpoint
+
+POST /products/_doc
+{
+  "name" : "Coffee Maker",
+  "price" : 45,
+  "in_stock" : 6
+}
+
+POST /products/_doc/100
+{
+  "name" : "Toaster",
+  "price" : 34,
+  "in_stock" : 18
+}
+
+->  there is a setting called "action.auto_create_index" that can be configured at cluster level which specifies if indices sould be created automatically. [the setting defaults to "true" => if we try to add a document to a non-existing index, the index will be created, after which the document will be added to it]
+->  it is best practice to explicitly create indices
+
+
+
+
+Retrieving documents by ID
+--------------------------
+GET /products/_doc/100
+
+
+
+
+Updating documents
+------------------
+POST /products/_update/100
+{
+  "doc" : {
+    "in_stock" : 17
+  }
+}
+
+
+Add new fields to existing document
+-----------------------------------
+->  Any field that does not exist already is added
+
+POST /products/_update/100
+{
+  "doc" : {
+    "tags" : ["electronics"]
+  }
+}
+
+
+->  Elasticsearch Documents are Immutable
+    -  The "UPDATE" API retrieves the current document, change the fields according to our specification and re-index the document with the same "id" effectively replacing it
+
+
 
 
 
